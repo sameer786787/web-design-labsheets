@@ -1,0 +1,27 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+if (!$id || $conn->connect_error) {
+    exit("Invalid request");
+}
+
+$stmt = $conn->prepare("SELECT * FROM books WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+if ($book = $result->fetch_assoc()) {
+    echo "<h2>" . htmlspecialchars($book['title']) . "</h2>";
+    echo "<p>Author: " . htmlspecialchars($book['author']) . "</p>";
+    echo "<p>Price: ₹" . htmlspecialchars($book['price']) . "</p>";
+    echo "<p>Stock: " . (int)$book['stock'] . "</p>";
+} else {
+    echo "Book not found";
+}
+
+$stmt->close();
+$conn->close();
+?>

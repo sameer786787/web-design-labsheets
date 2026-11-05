@@ -1,0 +1,31 @@
+<?php
+session_start();
+
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+$user_id = (int)($_SESSION['user_id'] ?? 0);
+
+if ($user_id <= 0) {
+    exit("Please log in first");
+}
+
+$stmt = $conn->prepare(
+    "SELECT id, total, status, created_at
+     FROM orders WHERE user_id = ?
+     ORDER BY id DESC"
+);
+
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    echo "Order: " . (int)$row['id'];
+    echo " | Total: ₹" . htmlspecialchars($row['total']);
+    echo " | Status: " . htmlspecialchars($row['status']) . "<br>";
+}
+
+$stmt->close();
+$conn->close();
+?>

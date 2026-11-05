@@ -1,0 +1,40 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)
+        || strlen($password) < 8) {
+        exit("Enter valid details and a password of at least 8 characters");
+    }
+
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+
+    $stmt = $conn->prepare(
+        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)"
+    );
+
+    $stmt->bind_param("sss", $name, $email, $hash);
+
+    if ($stmt->execute()) {
+        echo "Registration successful";
+    } else {
+        echo "Registration failed. Check whether the email already exists.";
+    }
+
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
+<form method="post">
+    <input name="name" placeholder="Name" required>
+    <input name="email" type="email" placeholder="Email" required>
+    <input name="password" type="password" minlength="8"
+           placeholder="Password" required>
+    <button type="submit">Register</button>
+</form>

@@ -1,0 +1,32 @@
+
+<?php
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+$limit = 5;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$offset = ($page - 1) * $limit;
+
+$stmt = $conn->prepare(
+    "SELECT * FROM books LIMIT ? OFFSET ?"
+);
+
+$stmt->bind_param("ii", $limit, $offset);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+while ($book = $result->fetch_assoc()) {
+    echo htmlspecialchars($book['title']) . "<br>";
+}
+
+$count = $conn->query("SELECT COUNT(*) AS total FROM books");
+$total = $count->fetch_assoc()['total'];
+$pages = ceil($total / $limit);
+
+for ($i = 1; $i <= $pages; $i++) {
+    echo "<a href='?page=$i'>$i</a> ";
+}
+
+$stmt->close();
+$conn->close();
+?>

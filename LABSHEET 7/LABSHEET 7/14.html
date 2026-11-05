@@ -1,0 +1,24 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+$title = trim($_POST['title'] ?? '');
+
+if ($title === '') {
+    exit("Title is required");
+}
+
+$stmt = $conn->prepare(
+    "INSERT INTO books (title) VALUES (?)"
+);
+
+$stmt->bind_param("s", $title);
+
+if ($stmt->execute()) {
+    echo "Book added successfully";
+} else {
+    echo "Database operation failed";
+}
+
+$stmt->close();
+$conn->close();
+?>

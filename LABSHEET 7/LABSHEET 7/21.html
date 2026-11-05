@@ -1,0 +1,25 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+if ($conn->connect_error) {
+    exit("Database connection failed");
+}
+
+$sql = "
+    SELECT
+        COUNT(*) AS total_orders,
+        COALESCE(SUM(total), 0) AS total_revenue
+    FROM orders
+    WHERE status IN ('Shipped', 'Delivered')
+";
+
+$result = $conn->query($sql);
+$data = $result->fetch_assoc();
+
+echo "<h2>Sales Summary Report</h2>";
+echo "Total Orders: " . (int)$data['total_orders'] . "<br>";
+echo "Total Revenue: ₹" .
+     htmlspecialchars($data['total_revenue']);
+
+$conn->close();
+?>

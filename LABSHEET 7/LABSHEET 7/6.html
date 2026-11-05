@@ -1,0 +1,34 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+    $action = $_POST['action'] ?? '';
+
+    if ($id && $action === 'add') {
+        $_SESSION['cart'][$id] =
+            ($_SESSION['cart'][$id] ?? 0) + 1;
+    }
+
+    if ($id && $action === 'remove') {
+        unset($_SESSION['cart'][$id]);
+    }
+}
+?>
+
+<h2>Shopping Cart</h2>
+
+<?php foreach ($_SESSION['cart'] as $id => $quantity) { ?>
+    <p>Book ID: <?= (int)$id ?>
+       | Quantity: <?= (int)$quantity ?></p>
+<?php } ?>
+
+<form method="post">
+    <input type="number" name="id" placeholder="Book ID" required>
+    <button name="action" value="add">Add Book</button>
+    <button name="action" value="remove">Remove Book</button>
+</form>

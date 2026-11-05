@@ -1,0 +1,34 @@
+CREATE TABLE wishlist (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    book_id INT,
+    UNIQUE KEY unique_wishlist (user_id, book_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (book_id) REFERENCES books(id)
+);
+
+<?php
+session_start();
+
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+$user_id = (int)($_SESSION['user_id'] ?? 0);
+$book_id = filter_input(INPUT_POST, 'book_id', FILTER_VALIDATE_INT);
+
+if (!$user_id || !$book_id) {
+    exit("Please log in and select a book");
+}
+
+$stmt = $conn->prepare(
+    "INSERT IGNORE INTO wishlist (user_id, book_id)
+     VALUES (?, ?)"
+);
+
+$stmt->bind_param("ii", $user_id, $book_id);
+$stmt->execute();
+
+echo "Book saved to wishlist";
+
+$stmt->close();
+$conn->close();
+?>

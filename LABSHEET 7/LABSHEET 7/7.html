@@ -1,0 +1,33 @@
+<?php
+session_start();
+
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $user_id = (int)($_SESSION['user_id'] ?? 0);
+    $address = trim($_POST['address'] ?? '');
+
+    if ($user_id <= 0 || $address === '') {
+        exit("Login and enter your shipping address");
+    }
+
+    $stmt = $conn->prepare(
+        "INSERT INTO orders (user_id, total, address)
+         VALUES (?, 0, ?)"
+    );
+
+    $stmt->bind_param("is", $user_id, $address);
+    $stmt->execute();
+
+    echo "Order created. Order ID: " . $conn->insert_id;
+
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
+<form method="post">
+    <textarea name="address" placeholder="Shipping address" required></textarea>
+    <button type="submit">Place Order</button>
+</form>

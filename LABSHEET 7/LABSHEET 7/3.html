@@ -1,0 +1,28 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+if ($conn->connect_error) {
+    die("Database connection failed");
+}
+
+$result = $conn->query("SELECT * FROM books WHERE stock > 0");
+?>
+
+<h2>Available Books</h2>
+
+<div style="display:flex; gap:20px; flex-wrap:wrap;">
+
+<?php while ($book = $result->fetch_assoc()) { ?>
+
+    <div style="border:1px solid gray; padding:15px;">
+        <h3><?= htmlspecialchars($book['title']) ?></h3>
+        <p>Author: <?= htmlspecialchars($book['author']) ?></p>
+        <p>Price: ₹<?= $book['price'] ?></p>
+        <a href="detail.php?id=<?= $book['id'] ?>">View Details</a>
+    </div>
+
+<?php } ?>
+
+</div>
+
+<?php $conn->close(); ?>

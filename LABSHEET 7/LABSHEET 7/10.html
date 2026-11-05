@@ -1,0 +1,29 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+$search = trim($_GET['search'] ?? '');
+
+$stmt = $conn->prepare(
+    "SELECT * FROM books
+     WHERE title LIKE ? OR author LIKE ?"
+);
+
+$pattern = "%" . $search . "%";
+$stmt->bind_param("ss", $pattern, $pattern);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+while ($book = $result->fetch_assoc()) {
+    echo htmlspecialchars($book['title']);
+    echo " - " . htmlspecialchars($book['author']) . "<br>";
+}
+
+$stmt->close();
+$conn->close();
+?>
+
+<form method="get">
+    <input name="search" placeholder="Search by title or author">
+    <button type="submit">Search</button>
+</form>

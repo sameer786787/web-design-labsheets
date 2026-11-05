@@ -1,0 +1,35 @@
+<?php
+session_start();
+
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+$quantity = filter_input(INPUT_POST, 'quantity', FILTER_VALIDATE_INT);
+
+if (!$id || !$quantity || $quantity < 1) {
+    exit("Invalid book or quantity");
+}
+
+$stmt = $conn->prepare("SELECT stock FROM books WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+
+$result = $stmt->get_result();
+$book = $result->fetch_assoc();
+
+if (!$book) {
+    exit("Book not found");
+}
+
+$current = $_SESSION['cart'][$id] ?? 0;
+
+if ($current + $quantity <= $book['stock']) {
+    $_SESSION['cart'][$id] = $current + $quantity;
+    echo "Book added to cart";
+} else {
+    echo "Not enough stock available";
+}
+
+$stmt->close();
+$conn->close();
+?>

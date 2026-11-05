@@ -1,0 +1,35 @@
+<?php
+session_start();
+
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+$user_id = (int)($_SESSION['user_id'] ?? 0);
+$order_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+if (!$user_id || !$order_id) {
+    exit("Invalid request");
+}
+
+$stmt = $conn->prepare(
+    "SELECT id, total, address, status
+     FROM orders WHERE id = ? AND user_id = ?"
+);
+
+$stmt->bind_param("ii", $order_id, $user_id);
+$stmt->execute();
+
+$order = $stmt->get_result()->fetch_assoc();
+
+if (!$order) {
+    exit("Invoice not found");
+}
+
+echo "<h2>Bookstore Invoice</h2>";
+echo "Order ID: " . (int)$order['id'] . "<br>";
+echo "Total: ₹" . htmlspecialchars($order['total']) . "<br>";
+echo "Address: " . htmlspecialchars($order['address']) . "<br>";
+echo "Status: " . htmlspecialchars($order['status']);
+
+$stmt->close();
+$conn->close();
+?>

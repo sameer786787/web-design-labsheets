@@ -1,0 +1,42 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $title = trim($_POST['title'] ?? '');
+    $author = trim($_POST['author'] ?? '');
+    $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_FLOAT);
+    $stock = filter_input(INPUT_POST, 'stock', FILTER_VALIDATE_INT);
+
+    if ($title === '' || $author === '' ||
+        $price === false || $price <= 0 ||
+        $stock === false || $stock < 0) {
+        exit("Invalid book details");
+    }
+
+    $stmt = $conn->prepare(
+        "INSERT INTO books (title, author, price, stock)
+         VALUES (?, ?, ?, ?)"
+    );
+
+    $stmt->bind_param("ssdi", $title, $author, $price, $stock);
+
+    echo $stmt->execute() ?
+        "Book added successfully" : "Unable to add book";
+
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
+<h2>Admin Dashboard</h2>
+
+<form method="post">
+    <input name="title" placeholder="Book Title" required>
+    <input name="author" placeholder="Author" required>
+    <input name="price" type="number" step="0.01" min="0.01"
+           placeholder="Price" required>
+    <input name="stock" type="number" min="0"
+           placeholder="Stock" required>
+    <button type="submit">Add Book</button>
+</form>

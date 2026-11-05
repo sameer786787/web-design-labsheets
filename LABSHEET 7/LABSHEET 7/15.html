@@ -1,0 +1,47 @@
+CREATE TABLE reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    book_id INT,
+    rating INT,
+    comment TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (book_id) REFERENCES books(id)
+);
+<?php
+session_start();
+
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $user_id = (int)($_SESSION['user_id'] ?? 0);
+    $book_id = filter_input(INPUT_POST, 'book_id', FILTER_VALIDATE_INT);
+    $rating = filter_input(INPUT_POST, 'rating', FILTER_VALIDATE_INT);
+    $comment = trim($_POST['comment'] ?? '');
+
+    if (!$user_id || !$book_id || !$rating ||
+        $rating < 1 || $rating > 5) {
+        exit("Invalid review details");
+    }
+
+    $stmt = $conn->prepare(
+        "INSERT INTO reviews (user_id, book_id, rating, comment)
+         VALUES (?, ?, ?, ?)"
+    );
+
+    $stmt->bind_param("iiis", $user_id, $book_id, $rating, $comment);
+    $stmt->execute();
+
+    echo "Review submitted successfully";
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
+<form method="post">
+    <input type="number" name="book_id" placeholder="Book ID" required>
+    <input type="number" name="rating" min="1" max="5"
+           placeholder="Rating 1-5" required>
+    <textarea name="comment" placeholder="Write a review"></textarea>
+    <button type="submit">Submit Review</button>
+</form>

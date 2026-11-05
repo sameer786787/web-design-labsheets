@@ -1,0 +1,30 @@
+<?php
+$conn = new mysqli("localhost", "root", "", "bookstore");
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+    $status = $_POST['status'] ?? '';
+
+    $allowed = ['Pending', 'Shipped', 'Delivered'];
+
+    if ($id && in_array($status, $allowed, true)) {
+        $stmt = $conn->prepare(
+            "UPDATE orders SET status = ? WHERE id = ?"
+        );
+
+        $stmt->bind_param("si", $status, $id);
+        $stmt->execute();
+        $stmt->close();
+    }
+}
+
+$result = $conn->query("SELECT * FROM orders ORDER BY id DESC");
+
+while ($row = $result->fetch_assoc()) {
+    echo "Order ID: " . (int)$row['id'];
+    echo " | Total: ₹" . htmlspecialchars($row['total']);
+    echo " | Status: " . htmlspecialchars($row['status']) . "<br>";
+}
+
+$conn->close();
+?>
