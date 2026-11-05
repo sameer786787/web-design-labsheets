@@ -1,0 +1,57 @@
+<?php
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    exit("Method not allowed");
+}
+
+if (!isset($_FILES['file']) ||
+    $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+    exit("Upload failed");
+}
+
+$file = $_FILES['file'];
+
+if ($file['size'] > 2 * 1024 * 1024) {
+    exit("File must be 2 MB or smaller");
+}
+
+$finfo = new finfo(FILEINFO_MIME_TYPE);
+$mime = $finfo->file($file['tmp_name']);
+
+$allowed = [
+    'image/jpeg' => 'jpg',
+    'image/png' => 'png',
+    'application/pdf' => 'pdf'
+];
+
+if (!isset($allowed[$mime])) {
+    exit("Invalid file type");
+}
+
+$directory = dirname(__DIR__) . '/private_uploads';
+
+if (!is_dir($directory) &&
+    !mkdir($directory, 0700, true)) {
+    exit("Upload directory unavailable");
+}
+
+if (!is_writable($directory)) {
+    exit("Upload directory is not writable");
+}
+
+$filename = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
+$destination = $directory . '/' . $filename;
+
+if (!move_uploaded_file($file['tmp_name'], $destination)) {
+    exit("Unable to save file");
+}
+
+echo "File uploaded successfully";
+?>
+
+<form action="upload.php" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file" required>
+    <button type="submit">Upload</button>
+</form>

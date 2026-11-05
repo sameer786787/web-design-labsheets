@@ -1,0 +1,24 @@
+sudo mkdir -p /etc/ssl/myproject
+sudo openssl req -x509 -nodes -days 365 \
+-newkey rsa:2048 \
+-keyout /etc/ssl/myproject/myproject.key \
+-out /etc/ssl/myproject/myproject.crt \
+-subj "/CN=myproject.local" \
+-addext "subjectAltName=DNS:myproject.local"
+sudo a2enmod ssl
+sudo a2enmod rewrite
+<VirtualHost *:443>
+    ServerName myproject.local
+    DocumentRoot /var/www/myproject/public
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/myproject/myproject.crt
+    SSLCertificateKeyFile /etc/ssl/myproject/myproject.key
+
+    <Directory /var/www/myproject/public>
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+sudo apache2ctl configtest
+sudo systemctl restart apache2

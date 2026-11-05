@@ -1,0 +1,33 @@
+<?php
+session_start();
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
+
+<form method="POST" action="submit.php">
+    <input type="hidden" name="csrf_token"
+           value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+
+    <input type="text" name="name" required>
+
+    <button type="submit">Submit</button>
+</form>
+
+<?php
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' ||
+    !isset($_POST['csrf_token']) ||
+    !is_string($_POST['csrf_token']) ||
+    !isset($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    http_response_code(403);
+    exit("Invalid CSRF token");
+}
+
+unset($_SESSION['csrf_token']);
+
+echo "Form submitted successfully";
+?>

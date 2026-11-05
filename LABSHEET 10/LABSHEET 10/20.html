@@ -1,0 +1,21 @@
+mysql -u root -p
+CREATE DATABASE myproject;
+
+CREATE USER 'app_user'@'localhost'
+IDENTIFIED BY 'Use-A-Strong-Unique-Password';
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON myproject.*
+TO 'app_user'@'localhost';
+SHOW GRANTS FOR 'app_user'@'localhost';
+mysql -u app_user -p myproject
+<?php
+$pdo = new PDO(
+    "mysql:host=localhost;dbname=myproject;charset=utf8mb4",
+    "app_user",
+    getenv('DB_PASSWORD'),
+    [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]
+);
+?>

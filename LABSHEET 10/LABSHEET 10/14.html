@@ -1,0 +1,39 @@
+composer require phpmailer/phpmailer
+<?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+$mail = new PHPMailer(true);
+
+try {
+    $mail->isSMTP();
+    $mail->Host = getenv('SMTP_HOST');
+    $mail->SMTPAuth = true;
+    $mail->Username = getenv('SMTP_USERNAME');
+    $mail->Password = getenv('SMTP_PASSWORD');
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = 587;
+
+    $mail->setFrom(
+        getenv('SMTP_USERNAME'),
+        'My Project'
+    );
+
+    $mail->addAddress('user@example.com');
+
+    $mail->isHTML(true);
+    $mail->Subject = 'Registration Confirmation';
+    $mail->Body = '<h2>Welcome!</h2><p>Your registration is complete.</p>';
+
+    $mail->AltBody = 'Welcome! Your registration is complete.';
+
+    $mail->send();
+
+    echo "Email sent successfully";
+} catch (Exception $e) {
+    error_log("Email sending failed: " . $mail->ErrorInfo);
+    echo "Unable to send email";
+}
+?>

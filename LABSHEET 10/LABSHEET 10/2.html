@@ -1,0 +1,24 @@
+git switch -c feature-homepage
+<?php
+echo "Welcome to Feature Homepage";
+?>
+git add index.php
+git commit -m "Add feature homepage"
+git switch main
+<?php
+echo "Welcome to Main Homepage";
+?>
+git add index.php
+git commit -m "Update main homepage"
+
+git merge feature-homepage
+<<<<<<< HEAD
+echo "Welcome to Main Homepage";
+=======
+echo "Welcome to Feature Homepage";
+>>>>>>> feature-homepage
+<?php
+echo "Welcome to My Homepage";
+?>
+git add index.php
+git commit -m "Resolve homepage merge conflict"

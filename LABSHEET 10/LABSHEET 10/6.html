@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><?= htmlspecialchars($title ?? 'My Project') ?></title>
+</head>
+<body>
+
+<?php require __DIR__ . '/navigation.php'; ?>
+<nav>
+    <a href="/">Home</a> |
+    <a href="/products">Products</a> |
+    <a href="/contact">Contact</a>
+</nav>
+<hr>
+
+<?php
+$title = "Product Page";
+require __DIR__ . '/header.php';
+?>
+
+<h2>Welcome to My Project</h2>
+
+<?php require __DIR__ . '/footer.php'; ?>

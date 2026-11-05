@@ -1,0 +1,63 @@
+CREATE TABLE login_attempts (
+    email VARCHAR(255) PRIMARY KEY,
+    attempts INT NOT NULL DEFAULT 0,
+    locked_until DATETIME NULL
+);
+
+<?php
+require_once 'db.php';
+
+$email = strtolower(trim($_POST['email'] ?? ''));
+$password = $_POST['password'] ?? '';
+
+$stmt = $pdo->prepare(
+    "SELECT attempts, locked_until
+     FROM login_attempts WHERE email = ?"
+);
+$stmt->execute([$email]);
+$attempt = $stmt->fetch();
+
+if ($attempt && $attempt['locked_until'] &&
+    strtotime($attempt['locked_until']) > time()) {
+    exit("Account temporarily locked. Try again later.");
+}
+
+$stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+$stmt->execute([$email]);
+$user = $stmt->fetch();
+
+if ($user && password_verify($password, $user['password'])) {
+    $stmt = $pdo->prepare(
+        "DELETE FROM login_attempts WHERE email = ?"
+    );
+    $stmt->execute([$email]);
+
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = $user['id'];
+
+    echo "Login successful";
+} else {
+    $count = ($attempt && $attempt['locked_until'] &&
+              strtotime($attempt['locked_until']) <= time())
+             ? 0
+             : (int)($attempt['attempts'] ?? 0);
+
+    $count++;
+
+    $lockedUntil = $count >= 5
+        ? date('Y-m-d H:i:s', time() + 900)
+        : null;
+
+    $stmt = $pdo->prepare(
+        "INSERT INTO login_attempts (email, attempts, locked_until)
+         VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+         attempts = VALUES(attempts),
+         locked_until = VALUES(locked_until)"
+    );
+
+    $stmt->execute([$email, $count, $lockedUntil]);
+
+    echo "Invalid email or password";
+}
+?>

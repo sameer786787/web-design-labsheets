@@ -1,0 +1,22 @@
+sudo mkdir -p /var/www/myproject/public
+sudo nano /var/www/myproject/public/index.php
+<?php
+echo "Welcome to My Project";
+?>
+<VirtualHost *:80>
+    ServerName myproject.local
+    DocumentRoot /var/www/myproject/public
+
+    <Directory /var/www/myproject/public>
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/myproject-error.log
+    CustomLog ${APACHE_LOG_DIR}/myproject-access.log combined
+</VirtualHost>
+sudo a2ensite myproject.conf
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+sudo nano /etc/hosts
+http://myproject.local

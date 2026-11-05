@@ -1,0 +1,37 @@
+<?php
+$email = filter_var(
+    $_POST['email'] ?? '',
+    FILTER_VALIDATE_EMAIL
+);
+
+$url = filter_var(
+    $_POST['url'] ?? '',
+    FILTER_VALIDATE_URL
+);
+
+$age = filter_var(
+    $_POST['age'] ?? '',
+    FILTER_VALIDATE_INT
+);
+
+$name = filter_var(
+    $_POST['name'] ?? '',
+    FILTER_UNSAFE_RAW
+);
+
+if ($email === false) {
+    echo "Invalid email";
+} elseif ($url === false) {
+    echo "Invalid URL";
+} elseif ($age === false || $age < 1 || $age > 120) {
+    echo "Invalid age";
+} elseif (!is_string($name) ||
+          trim($name) === '' ||
+          strlen($name) > 100) {
+    echo "Invalid name";
+} else {
+    echo "Input validated successfully";
+}
+?>
+
+echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
