@@ -1,0 +1,53 @@
+<?php
+require_once "db.php";
+
+$result = $conn->query("SELECT * FROM products");
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Product List</h2>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+    </tr>
+
+    <?php while ($row = $result->fetch_assoc()) { ?>
+        <tr>
+            <td><?= (int)$row["id"] ?></td>
+            <td><?= htmlspecialchars($row["name"]) ?></td>
+            <td><?= htmlspecialchars($row["category"]) ?></td>
+            <td>₹<?= htmlspecialchars($row["price"]) ?></td>
+            <td><?= (int)$row["stock"] ?></td>
+        </tr>
+    <?php } ?>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<?php
+require_once "db.php";
+
+$limit = 5;
+$page = max(1, (int)($_GET["page"] ?? 1));
+
+$count = $conn->query("SELECT COUNT(*) AS total FROM products");
+$total = (int)$count->fetch_assoc()["total"];
+
+$pages = max(1, (int)ceil($total / $limit));
+$page = min($page, $pages);
+
+$offset = ($page - 1) * $limit;
+
+$stmt = $conn->prepare(
+    "SELECT * FROM products LIMIT ? OFFSET ?"
+);
+
+$stmt->bind_param("ii", $limit, $offset);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    echo htmlspecialchars($row["name"]) . " - ₹";
+    echo htmlspecialchars($row["price"]) . "<br>";
+}
+
+if ($page > 1) {
+    echo "<a href='?page=" . ($page - 1) . "'>Previous</a> ";
+}
+
+for ($i = 1; $i <= $pages; $i++) {
+    echo "<a href='?page=$i'>$i</a> ";
+}
+
+if ($page < $pages) {
+    echo "<a href='?page=" . ($page + 1) . "'>Next</a>";
+}
+
+$stmt->close();
+?>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Search Products</h2>
+
+<input type="text" id="search" placeholder="Enter product name">
+
+<div id="results"></div>
+
+<script>
+const input = document.getElementById("search");
+const results = document.getElementById("results");
+
+input.addEventListener("input", async function () {
+    const query = input.value.trim();
+
+    if (!query) {
+        results.replaceChildren();
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            "live_search.php?q=" + encodeURIComponent(query)
+        );
+
+        if (!response.ok) {
+            throw new Error("Search failed");
+        }
+
+        const products = await response.json();
+
+        results.replaceChildren();
+
+        products.forEach(function (product) {
+            const item = document.createElement("p");
+            item.textContent = product.name + " - ₹" + product.price;
+            results.appendChild(item);
+        });
+    } catch (error) {
+        results.textContent = "Unable to load search results.";
+    }
+});
+</script>
+
+</body>
+</html>
+
+<?php
+require_once "db.php";
+
+header("Content-Type: application/json; charset=UTF-8");
+
+$q = trim($_GET["q"] ?? "");
+
+if ($q === "") {
+    echo json_encode([]);
+    exit;
+}
+
+$stmt = $conn->prepare(
+    "SELECT id, name, price
+     FROM products
+     WHERE name LIKE ?
+     LIMIT 10"
+);
+
+$pattern = "%" . $q . "%";
+
+$stmt->bind_param("s", $pattern);
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+$products = [];
+
+while ($row = $result->fetch_assoc()) {
+    $products[] = $row;
+}
+
+echo json_encode($products);
+
+$stmt->close();
+$conn->close();
+?>

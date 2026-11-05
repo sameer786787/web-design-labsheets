@@ -1,0 +1,21 @@
+<?php
+require_once "db.php";
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    exit("Invalid request");
+}
+
+$id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
+
+if (!$id) {
+    exit("Invalid product ID");
+}
+
+$stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+
+echo "Product deleted successfully";
+
+$stmt->close();
+?>

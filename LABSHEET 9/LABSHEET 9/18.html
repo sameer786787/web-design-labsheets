@@ -1,0 +1,45 @@
+<?php
+session_start();
+
+if (!isset($_SESSION["cart"])) {
+    $_SESSION["cart"] = [];
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
+    $action = $_POST["action"] ?? "";
+
+    if ($id && $action === "add") {
+        $_SESSION["cart"][$id] =
+            ($_SESSION["cart"][$id] ?? 0) + 1;
+    }
+
+    if ($id && $action === "remove") {
+        unset($_SESSION["cart"][$id]);
+    }
+
+    if ($id && $action === "update") {
+        $qty = filter_input(INPUT_POST, "quantity", FILTER_VALIDATE_INT);
+
+        if ($qty && $qty > 0) {
+            $_SESSION["cart"][$id] = $qty;
+        }
+    }
+}
+?>
+
+<h2>Shopping Cart</h2>
+
+<?php foreach ($_SESSION["cart"] as $id => $qty) { ?>
+    <p>Product ID: <?= (int)$id ?>
+       | Quantity: <?= (int)$qty ?></p>
+<?php } ?>
+
+<form method="post">
+    <input type="number" name="id" placeholder="Product ID" required>
+    <input type="number" name="quantity" min="1" placeholder="Quantity">
+
+    <button name="action" value="add">Add</button>
+    <button name="action" value="update">Update</button>
+    <button name="action" value="remove">Remove</button>
+</form>

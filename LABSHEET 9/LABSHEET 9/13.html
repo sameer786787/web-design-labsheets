@@ -1,0 +1,43 @@
+<?php
+require_once "db.php";
+
+$allowed = ["name", "price", "stock"];
+$sort = $_GET["sort"] ?? "name";
+$order = strtoupper($_GET["order"] ?? "ASC");
+
+if (!in_array($sort, $allowed, true)) {
+    $sort = "name";
+}
+
+if (!in_array($order, ["ASC", "DESC"], true)) {
+    $order = "ASC";
+}
+
+$sql = "SELECT * FROM products ORDER BY $sort $order";
+$result = $conn->query($sql);
+
+echo "<table border='1'>";
+echo "<tr>";
+
+foreach ($allowed as $column) {
+    $next = ($sort === $column && $order === "ASC") ? "DESC" : "ASC";
+
+    echo "<th><a href='?sort=$column&order=$next'>";
+    echo htmlspecialchars(ucfirst($column));
+    echo "</a></th>";
+}
+
+echo "</tr>";
+
+while ($row = $result->fetch_assoc()) {
+    echo "<tr>";
+
+    foreach ($allowed as $column) {
+        echo "<td>" . htmlspecialchars((string)$row[$column]) . "</td>";
+    }
+
+    echo "</tr>";
+}
+
+echo "</table>";
+?>
