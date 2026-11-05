@@ -1,0 +1,38 @@
+<section id="reviews">
+    <h2>Customer Reviews</h2>
+
+    <div class="review-grid">
+        <article class="review">
+            <h3>Customer One</h3>
+            <p class="stars" aria-label="5 out of 5 stars">
+                ★★★★★
+            </p>
+            <p>The cakes are fresh and delicious.</p>
+        </article>
+
+        <article class="review">
+            <h3>Customer Two</h3>
+            <p class="stars" aria-label="4 out of 5 stars">
+                ★★★★☆
+            </p>
+            <p>Great taste and friendly service.</p>
+        </article>
+    </div>
+</section>
+
+.review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.review {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.stars {
+    color: #8a4b00;
+    font-size: 24px;
+}
